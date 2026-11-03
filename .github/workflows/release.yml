@@ -1,7 +1,7 @@
 name: Build and Release APK
 
 on:
-  workflow_dispatch: # Allows manual trigger button in GitHub UI
+  workflow_dispatch:
   push:
     branches:
       - master
@@ -28,12 +28,26 @@ jobs:
       - name: Build Debug APK
         run: ./gradlew assembleDebug
 
-      - name: Rename APK with Tag Version
+      - name: Determine Version Name and Rename APK
+        id: get_version
         run: |
-          VERSION=${GITHUB_REF#refs/tags/}
-          mv app/build/outputs/apk/debug/app-debug.apk TouchGuard-$VERSION.apk
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            CLEAN_VERSION="${GITHUB_REF#refs/tags/}"
+          else
+            # Replaces slashes with dashes and attaches short commit hash
+            CLEAN_VERSION="${GITHUB_REF_NAME//\//-}-${GITHUB_SHA::7}"
+          fi
+          echo "VERSION=${CLEAN_VERSION}" >> $GITHUB_OUTPUT
+          mv app/build/outputs/apk/debug/app-debug.apk "TouchGuard-${CLEAN_VERSION}.apk"
 
-      - name: Create GitHub Release
+      - name: Upload APK as Workflow Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TouchGuard-${{ steps.get_version.outputs.VERSION }}
+          path: TouchGuard-*.apk
+
+      - name: Create GitHub Release (Tags Only)
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
           files: TouchGuard-*.apk
