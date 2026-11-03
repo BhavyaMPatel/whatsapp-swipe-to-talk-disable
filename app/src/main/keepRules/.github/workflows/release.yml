@@ -1,7 +1,10 @@
 name: Build and Release APK
 
 on:
+  workflow_dispatch: # Allows manual trigger button in GitHub UI
   push:
+    branches:
+      - master
     tags:
       - 'v*'
 
