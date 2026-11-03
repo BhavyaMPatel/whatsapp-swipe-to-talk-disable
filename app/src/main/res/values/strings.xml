@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">TouchGuard</string>
+    <string name="accessibility_service_description">Prevents accidental voice chat activation and smooths message scrolling.</string>
+</resources>
