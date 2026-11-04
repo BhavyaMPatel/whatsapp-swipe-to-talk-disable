@@ -1,6 +1,6 @@
 # TouchGuard
 
-TouchGuard is a lightweight Android accessibility service designed to prevent accidental WhatsApp group voice chat popups and voice note recording locks, without interfering with legitimate 1-on-1 or regular VoIP phone calls.
+TouchGuard is a lightweight Android accessibility service designed to automatically intercept and exit accidental WhatsApp group voice chat rooms ("Swipe to talk"), without interfering with legitimate 1-on-1 or regular VoIP phone calls.
 
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Donate-yellow.svg?logo=buy-me-a-coffee)](https://buymeacoffee.com/bhavyampatel)
 
@@ -9,13 +9,12 @@ TouchGuard is a lightweight Android accessibility service designed to prevent ac
 ## Features
 
 - **Accidental Group Voice Chat Defusal:** Instantly exits accidental "Swipe to talk" group voice rooms while inside the chat interface.
-- **Normal Call Protection:** Automatically detects ongoing VoIP calls (speakerphone, mute, screen sharing controls) to ensure real phone calls remain completely uninterrupted.
-- **Voice Note Recording Guard:** Cancels locked background voice note recordings triggered by accidental swipes.
+- **Normal Call Protection:** Automatically identifies VoIP controls (speakerphone, mute, screen sharing) to ensure legitimate phone calls remain completely uninterrupted.
 - **Ultra-lightweight:** Operates with zero foreground notification bloat, no overlay windows, and instant native view querying (`notificationTimeout="0"`).
 
 ## How It Works
 
-TouchGuard uses Android's native `AccessibilityService` API to listen for WhatsApp UI state changes. When an active voice chat banner appears (`"Leave call"`) alongside chat composer elements (`"Message"`, `"Attach"`, `"Wave all"`), TouchGuard performs a near-instant programmatic dismissal.
+TouchGuard uses Android's native `AccessibilityService` API to listen for WhatsApp UI state changes. When an active voice chat banner appears (`"Leave call"`) alongside conversation elements (`"Message"`, `"Attach"`, `"Wave all"`), TouchGuard performs a programmatic dismissal within milliseconds.
 
 ## Installation & Setup
 

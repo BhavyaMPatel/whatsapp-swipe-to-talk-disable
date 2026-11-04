@@ -47,28 +47,6 @@ class WhatsAppScrollHelperService : AccessibilityService() {
             recycleNodes(leaveNodes)
         }
 
-        // 3. Defuse accidental Voice Note locks (Slide to cancel / Cancel recording)
-        val cancelNodes = rootNode.findAccessibilityNodeInfosByText("Cancel")
-        if (cancelNodes.isNotEmpty()) {
-            for (node in cancelNodes) {
-                val desc = node.contentDescription?.toString()?.trim() ?: ""
-                val text = node.text?.toString()?.trim() ?: ""
-                if (desc.contains("cancel recording", ignoreCase = true) ||
-                    desc.contains("delete recording", ignoreCase = true) ||
-                    text.equals("Slide to cancel", ignoreCase = true)
-                ) {
-                    if (performFastClick(node)) {
-                        Log.i(TAG, "Auto-cancelled locked Voice Note recording")
-                        lastActionTime = now
-                        recycleNodes(cancelNodes)
-                        rootNode.recycle()
-                        return
-                    }
-                }
-            }
-            recycleNodes(cancelNodes)
-        }
-
         rootNode.recycle()
     }
 
@@ -76,7 +54,6 @@ class WhatsAppScrollHelperService : AccessibilityService() {
      * Identifies legitimate ongoing 1-on-1 or regular group audio/video calls.
      */
     private fun isLegitimateCallScreen(root: AccessibilityNodeInfo): Boolean {
-        // Legitimate WhatsApp VoIP screen indicators
         val hasMinimise = root.findAccessibilityNodeInfosByText("Minimise call").isNotEmpty()
         val hasSpeaker = root.findAccessibilityNodeInfosByText("Turn speaker phone on").isNotEmpty()
         val hasAddPeople = root.findAccessibilityNodeInfosByText("Add people to this call").isNotEmpty()
@@ -89,7 +66,6 @@ class WhatsAppScrollHelperService : AccessibilityService() {
      * Confirms the "Leave call" button belongs to an accidental in-chat Voice Chat room.
      */
     private fun isGroupVoiceChatContext(root: AccessibilityNodeInfo): Boolean {
-        // Group Voice Chat specific indicators (banners and co-existing chat input)
         val hasMessageBar = root.findAccessibilityNodeInfosByText("Message").isNotEmpty()
         val hasWaveAll = root.findAccessibilityNodeInfosByText("Wave all").isNotEmpty()
         val hasConnecting = root.findAccessibilityNodeInfosByText("Connecting").isNotEmpty()
