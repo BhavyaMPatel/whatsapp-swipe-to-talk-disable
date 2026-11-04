@@ -2,6 +2,10 @@
 
 TouchGuard is a lightweight Android accessibility service designed to prevent accidental WhatsApp group voice chat popups and voice note recording locks, without interfering with legitimate 1-on-1 or regular VoIP phone calls.
 
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Donate-yellow.svg?logo=buy-me-a-coffee)](https://buymeacoffee.com/bhavyampatel)
+
+---
+
 ## Features
 
 - **Accidental Group Voice Chat Defusal:** Instantly exits accidental "Swipe to talk" group voice rooms while inside the chat interface.
