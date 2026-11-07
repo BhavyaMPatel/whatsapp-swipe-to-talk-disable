@@ -24,16 +24,12 @@ class WhatsAppScrollHelperService : AccessibilityService() {
 
         val rootNode = rootInActiveWindow ?: return
 
-        // 1. Check if this is a legitimate phone call window
-        if (isLegitimateCallScreen(rootNode)) {
-            rootNode.recycle()
-            return
-        }
-
-        // 2. Defuse accidental Group Voice Chat (Leave call inside chat view)
+        // Check if "Leave call" is present on screen
         val leaveNodes = rootNode.findAccessibilityNodeInfosByText("Leave call")
         if (leaveNodes.isNotEmpty()) {
-            if (isGroupVoiceChatContext(rootNode)) {
+            val visibleTexts = extractKeyIndicators(rootNode)
+
+            if (CallDismissalPolicy.shouldDismissCall(hasLeaveCallNode = true, visibleTexts = visibleTexts)) {
                 for (node in leaveNodes) {
                     if (performFastClick(node)) {
                         Log.i(TAG, "Auto-dismissed accidental Group Voice Chat")
@@ -50,29 +46,20 @@ class WhatsAppScrollHelperService : AccessibilityService() {
         rootNode.recycle()
     }
 
-    /**
-     * Identifies legitimate ongoing 1-on-1 or regular group audio/video calls.
-     */
-    private fun isLegitimateCallScreen(root: AccessibilityNodeInfo): Boolean {
-        val hasMinimise = root.findAccessibilityNodeInfosByText("Minimise call").isNotEmpty()
-        val hasSpeaker = root.findAccessibilityNodeInfosByText("Turn speaker phone on").isNotEmpty()
-        val hasAddPeople = root.findAccessibilityNodeInfosByText("Add people to this call").isNotEmpty()
-        val hasScreenShare = root.findAccessibilityNodeInfosByText("Start screen sharing").isNotEmpty()
-
-        return hasMinimise || hasSpeaker || hasAddPeople || hasScreenShare
-    }
-
-    /**
-     * Confirms the "Leave call" button belongs to an accidental in-chat Voice Chat room.
-     */
-    private fun isGroupVoiceChatContext(root: AccessibilityNodeInfo): Boolean {
-        val hasMessageBar = root.findAccessibilityNodeInfosByText("Message").isNotEmpty()
-        val hasWaveAll = root.findAccessibilityNodeInfosByText("Wave all").isNotEmpty()
-        val hasConnecting = root.findAccessibilityNodeInfosByText("Connecting").isNotEmpty()
-        val hasNoOneHere = root.findAccessibilityNodeInfosByText("No one else is here yet").isNotEmpty()
-        val hasAttach = root.findAccessibilityNodeInfosByText("Attach").isNotEmpty()
-
-        return hasMessageBar || hasWaveAll || hasConnecting || hasNoOneHere || hasAttach
+    private fun extractKeyIndicators(root: AccessibilityNodeInfo): Set<String> {
+        val candidates = listOf(
+            "Minimise call", "Turn speaker phone on", "Add people to this call", "Start screen sharing",
+            "Message", "Wave all", "Connecting", "No one else is here yet", "Attach"
+        )
+        val found = mutableSetOf<String>()
+        for (candidate in candidates) {
+            val nodes = root.findAccessibilityNodeInfosByText(candidate)
+            if (nodes.isNotEmpty()) {
+                found.add(candidate)
+                recycleNodes(nodes)
+            }
+        }
+        return found
     }
 
     private fun performFastClick(node: AccessibilityNodeInfo): Boolean {
